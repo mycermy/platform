@@ -12,11 +12,8 @@
     </title>
     <meta name="csrf_token" content="{{ csrf_token() }}" id="csrf_token">
     <meta name="auth" content="{{ Auth::check() }}" id="auth">
-    @if(\Orchid\Support\Locale::currentDir(app()->getLocale()) == "rtl")
-        <link rel="stylesheet" type="text/css" href="{{  mix('/css/orchid.rtl.css','vendor/orchid') }}">
-    @else
-        <link rel="stylesheet" type="text/css" href="{{  mix('/css/orchid.css','vendor/orchid') }}">
-    @endif
+
+    {{ Dashboard::vite() }}
 
     @stack('head')
 
@@ -31,18 +28,14 @@
         <meta name="turbo-cache-control" content="no-cache">
     @endif
 
-    <script src="{{ mix('/js/manifest.js','vendor/orchid') }}" type="text/javascript"></script>
-    <script src="{{ mix('/js/vendor.js','vendor/orchid') }}" type="text/javascript"></script>
-    <script src="{{ mix('/js/orchid.js','vendor/orchid') }}" type="text/javascript"></script>
-
     @foreach(Dashboard::getResource('stylesheets') as $stylesheet)
-        <link rel="stylesheet" href="{{  $stylesheet }}">
+        <link rel="stylesheet" href="{{  $stylesheet }}" data-turbo-track="reload">
     @endforeach
 
     @stack('stylesheets')
 
     @foreach(Dashboard::getResource('scripts') as $scripts)
-        <script src="{{  $scripts }}" defer type="text/javascript"></script>
+        <script src="{{  $scripts }}" defer type="text/javascript" data-turbo-track="reload"></script>
     @endforeach
 
     @if(!empty(config('platform.vite', [])))
@@ -57,7 +50,7 @@
     <div class="row justify-content-center d-md-flex h-100">
         @yield('aside')
 
-        <div class="col-xxl col-xl-9 col-12">
+        <div class="col-xxl col-lg-9 col-xl-9 col-12 mx-auto">
             @yield('body')
         </div>
     </div>
@@ -68,6 +61,6 @@
 
 @stack('scripts')
 
-
+@include('platform::partials.search-modal')
 </body>
 </html>

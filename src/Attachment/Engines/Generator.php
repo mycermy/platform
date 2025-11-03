@@ -8,43 +8,46 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Orchid\Attachment\Contracts\Engine;
 use Orchid\Attachment\MimeTypes;
+use RuntimeException;
 
 class Generator implements Engine
 {
+    protected const UNKNOWN = 'unknown';
+
     /**
      * The uploaded file instance.
      *
      * @var UploadedFile
      */
-    protected $file;
+    protected UploadedFile $file;
 
     /**
      * The Unix timestamp indicating the time when the file was created
      *
      * @var int
      */
-    protected $time;
+    protected int $time;
 
     /**
      * The generated unique identifier
      *
      * @var string
      */
-    protected $uniqueId;
+    protected string $uniqueId;
 
     /**
      * The mime types instance.
      *
      * @var MimeTypes
      */
-    protected $mimes;
+    protected MimeTypes $mimes;
 
     /**
      * The file path.
      *
      * @var ?string
      */
-    protected $path;
+    protected ?string $path;
 
     /**
      * Create a new Generator instance.
@@ -56,9 +59,8 @@ class Generator implements Engine
     public function __construct(UploadedFile $file)
     {
         $this->file = $file;
-        $this->path = null;
         $this->time = time();
-        $this->mimes = new MimeTypes();
+        $this->mimes = new MimeTypes;
         $this->uniqueId = uniqid('', true);
     }
 
@@ -68,7 +70,10 @@ class Generator implements Engine
      */
     public function name(): string
     {
-        return sha1($this->uniqueId.$this->file->getClientOriginalName());
+        return hash(
+            $this->hashAlgorithm(),
+            $this->uniqueId.$this->file->getClientOriginalName()
+        );
     }
 
     /**
@@ -90,9 +95,11 @@ class Generator implements Engine
     /**
      * Set the custom file path.
      *
-     * @return Generator
+     * @param string|null $path
+     *
+     * @return static
      */
-    public function setPath(?string $path = null)
+    public function setPath(?string $path = null): static
     {
         $this->path = $path;
 
@@ -104,7 +111,19 @@ class Generator implements Engine
      */
     public function hash(): string
     {
-        return sha1_file($this->file->path());
+        $hash = hash_file(
+            $this->hashAlgorithm(),
+            $this->file->path()
+        );
+
+        if ($hash === false) {
+            throw new RuntimeException(sprintf(
+                'Failed to generate a hash for the file: %s.',
+                $this->file->path()
+            ));
+        }
+
+        return $hash;
     }
 
     /**
@@ -117,13 +136,16 @@ class Generator implements Engine
 
     /**
      * Get the file extension.
+     *
+     * @psalm-suppress InvalidNullableReturnType
+     * @psalm-suppress NullableReturnStatement
      */
     public function extension(): string
     {
         $extension = $this->file->getClientOriginalExtension();
 
         return empty($extension)
-            ? $this->mimes->getExtension($this->file->getClientMimeType(), 'unknown')
+            ? $this->mimes->getExtension($this->file->getClientMimeType(), static::UNKNOWN)
             : $extension;
     }
 
@@ -134,6 +156,26 @@ class Generator implements Engine
     {
         return $this->mimes->getMimeType($this->extension())
             ?? $this->mimes->getMimeType($this->file->getClientMimeType())
-            ?? 'unknown';
+            ?? static::UNKNOWN;
+    }
+
+    /**
+     * Get the hashing algorithm used for file name and content hashing.
+     *
+     * This method centralizes the choice of hash algorithm used throughout
+     * the Generator. Changing the return value here will affect both
+     * the generated file name and the file content hash.
+     *
+     * Supported algorithms include those listed by `hash_algos()`,
+     * such as 'sha1', 'sha256', 'md5', etc.
+     *
+     * @see https://www.php.net/manual/en/function.hash.php
+     * @see https://www.php.net/manual/en/function.hash-file.php
+     *
+     * @return string The name of the hashing algorithm to use.
+     */
+    protected function hashAlgorithm(): string
+    {
+        return 'sha1';
     }
 }

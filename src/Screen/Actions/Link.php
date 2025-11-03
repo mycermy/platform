@@ -24,12 +24,19 @@ class Link extends Action
     protected $view = 'platform::actions.link';
 
     /**
+     * The field wrapper view type (horizontal/vertical).
+     *
+     * @var string|null
+     */
+    protected $typeForm = null;
+
+    /**
      * Default attributes value.
      *
      * @var array
      */
     protected $attributes = [
-        'class' => 'btn btn-link',
+        'class' => 'btn btn-link icon-link gap-2',
         'icon'  => null,
         'href'  => '#!',
         'turbo' => true,
@@ -64,7 +71,7 @@ class Link extends Action
     }
 
     /**
-     * @param array $parameters
+     * @param mixed $parameters
      * @param bool  $absolute
      *
      * @return $this

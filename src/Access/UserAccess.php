@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Orchid\Platform\Dashboard;
 use Orchid\Platform\Events\AddRoleEvent;
 use Orchid\Platform\Events\RemoveRoleEvent;
 use Orchid\Platform\Models\Role;
+use Orchid\Support\Facades\Dashboard;
 
 trait UserAccess
 {
@@ -44,7 +44,7 @@ trait UserAccess
      */
     public function inRole($role): bool
     {
-        $role = Arr::first($this->roles, static function ($instance) use ($role) {
+        $role = Arr::first($this->roles->all(), static function ($instance) use ($role) {
             if ($role instanceof RoleInterface) {
                 return $instance->getRoleId() === $role->getRoleId();
             }

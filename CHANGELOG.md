@@ -5,6 +5,434 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 14.52.4 - 2025-08-13
+
+### Fixed
+
+- Argument type in roles [#3035](https://github.com/orchidsoftware/platform/issues/3035)
+
+## 14.52.3 - 2025-07-07
+
+### Fixed
+
+-`Group::render()` now returns `null` if the field group is empty to prevent rendering an empty block and improve
+performance.
+
+## 14.52.2 - 2025-07-02
+
+### Fixed
+- Attach field send `null` when empty
+
+## 14.52.1 - 2025-06-30
+
+### Fixed
+- Filter value color contrast
+
+## 14.52.0 - 2025-05-04
+
+### Added
+- `Toggle` action button [#3009](https://github.com/orchidsoftware/platform/pull/3009)
+- Fill color parameter for cropper [#3007](https://github.com/orchidsoftware/platform/pull/3007)
+
+### Changed
+- Rename `getStatusPermission` to `statusOfPermissions`
+- Set Turbo scroll behavior to `preserve` by default [#3008](https://github.com/orchidsoftware/platform/pull/3008)
+
+### Fixed
+- Padding between text and close button
+
+## 14.51.2 - 2025-04-29
+
+### Fixed
+- Smooth opening of nested menu
+
+## 14.51.1 - 2025-04-29
+
+### Fixed
+- Fixed visual shift when using nested menu
+
+## 14.51.0 - 2025-04-29
+
+### Added
+- Added support HTML rendering in help and title fields [#3001](https://github.com/orchidsoftware/platform/pull/3001)
+- Support passing Eloquent models as action parameters [#3000](https://github.com/orchidsoftware/platform/pull/3000)
+- Split screen state/fillable logic into reusable trait
+
+### Changed
+- UI improvements for better look [#2999](https://github.com/orchidsoftware/platform/pull/2999)
+- Improve balance of added text in horizontal titles
+- Refactor component hashing: switch to `xxh3` [#3004](https://github.com/orchidsoftware/platform/pull/3004)
+- Extract hash algorithm to protected method for easier override [#3002](https://github.com/orchidsoftware/platform/pull/3002)
+
+### Fixed
+- Set default max slices to 6 to minimize issues with the used package [#2965](https://github.com/orchidsoftware/platform/issues/2965)
+- Avoid PHPUnit 12 conflict by using `Attributes\DataProvider` [#2990](https://github.com/orchidsoftware/platform/pull/2990)
+- Fix serialization and deserialization for unsaved Eloquent models [#3003](https://github.com/orchidsoftware/platform/pull/3003)
+- Workaround for Laravel `12.10.1` relation loading regression in `getAttribute()` [#3006](https://github.com/orchidsoftware/platform/pull/3006)
+- Fix file sorting issue on servers expecting `Content-Type` [#3005](https://github.com/orchidsoftware/platform/pull/3005)
+
+## 14.50.1 - 2025-04-02
+
+### Fixed
+- Added missing `name` inline attribute for field stub [#2987](https://github.com/orchidsoftware/platform/pull/2987)
+
+## 14.50.0 - 2025-03-31
+
+### Added
+- Added field stub [#2983](https://github.com/orchidsoftware/platform/pull/2983) [#2984](https://github.com/orchidsoftware/platform/pull/2984)
+- Methods `format/serverFormat` to `DateRange` field [#2975](https://github.com/orchidsoftware/platform/pull/2975)
+
+### Fixed
+- Disabled check for the latest package versions in `dev`
+
+
+## 14.49.0 - 2025-03-27
+
+### Added
+- Added a new Artisan command to publish `stubs` [#2978](https://github.com/orchidsoftware/platform/pull/2978)
+- Introduced the "confirm" attribute for property translations [#2976](https://github.com/orchidsoftware/platform/pull/2976)
+
+### Fixed
+- Corrected method annotation return type for `RadioButtons` [#2980](https://github.com/orchidsoftware/platform/pull/2980)
+
+## 14.48.1 - 2025-03-14
+
+### Fixed
+- Revert #2967 to `$this`
+
+## 14.48.0 - 2025-03-13
+
+### Added
+- `persistent` and `seconds` methods to Toast notification [#2974](https://github.com/orchidsoftware/platform/pull/2974)
+
+### Changed
+- Improve side menu notification badge and icon size
+
+### Fixed
+- Correct title for demo layouts page
+
+## 14.47.0 - 2025-03-13
+
+### Added
+- Support for simple persistent notification sending [#2968](https://github.com/orchidsoftware/platform/pull/2968)
+- Smoothing method for `Cropper` [#2966](https://github.com/orchidsoftware/platform/pull/2966)
+
+### Changed
+- Improved default text for the edit role screen
+- Updated triggers for GitHub Actions
+- Refactored `Field` class methods to support fluent chaining with a `static` return type [#2967](https://github.com/orchidsoftware/platform/pull/2967)
+
+## 14.46.1 - 2025-03-01
+
+### Fixed
+- Input files in the cropper now respect `$acceptedFiles` [#2962](https://github.com/orchidsoftware/platform/pull/2962)
+- Modal caching when navigating back and autofocus on open [#2959](https://github.com/orchidsoftware/platform/pull/2959)
+- Alias `disabled`/`readonly` for Quill [#2964](https://github.com/orchidsoftware/platform/pull/2964)
+
+## 14.46.0 - 2025-03-01
+
+### Added
+- Support for Laravel 12.x [#2957](https://github.com/orchidsoftware/platform/pull/2957) [#2960](https://github.com/orchidsoftware/platform/pull/2960)
+
+## 14.45.2 - 2025-02-05
+
+### Fixed
+- `like` filter for Laravel 11 [#2954](https://github.com/orchidsoftware/platform/issues/2954)
+
+## 14.45.1 - 2025-02-04
+
+### Fixed
+- Laravel version conflict [#2952](https://github.com/orchidsoftware/platform/pull/2952) [#2951](https://github.com/orchidsoftware/platform/issues/2951)
+
+## 14.45.0 - 2025-02-03
+
+### Added
+- Added keyboard accessibility for tab navigation [#2944](https://github.com/orchidsoftware/platform/pull/2944)
+- Added support for Kazakh language translations [#2949](https://github.com/orchidsoftware/platform/pull/2949)
+- Added `activeAccordion` method to `Accordion.php` [#2939](https://github.com/orchidsoftware/platform/pull/2939)
+- Added screen state test
+
+### Changed
+- Updated global search to use a window modal for better UX
+- Improved tag ID generation for tabs [#2935](https://github.com/orchidsoftware/platform/issues/2935)
+- Improved code on accordion layout
+- Improved type annotations and type hints
+- Improved types for screen testing
+
+### Fixed
+- Fixed Pslam errors
+- Fixed code style issues
+- Fixed types inconsistencies
+- Improved Accordion accessibility [#2946](https://github.com/orchidsoftware/platform/pull/2946)
+- Reload page when changing assets [#2932](https://github.com/orchidsoftware/platform/issues/2932)
+
+### CI/CD
+- Updated version of `actions/upload-artifact`
+
+## 14.44.2 - 2025-01-17
+
+### Added
+- Translated Role edit title and description in ru language [#2936](https://github.com/orchidsoftware/platform/pull/2936)
+
+### Changed
+- Use `whereLike` for case-insensitive search
+- Simplify RTL condition logic
+- Improved workspace centering on laptops
+- Increment pslam error level
+
+### Fixed
+- Laravel version conflict for PHP 8.4
+- Fixed jumping horizontal field title
+- Error Notifications Are Not Passing Correctly in Attach [#2934](https://github.com/orchidsoftware/platform/pull/2934)
+
+## 14.44.1 - 2024-11-26
+
+### Fixed
+- Required `composer/semver`
+
+## 14.44.0 - 2024-11-23
+
+### Changed
+- Remove default limits for 'Attach' field file size and quantity
+- Use `whereLike` for case-insensitive search [#2924](https://github.com/orchidsoftware/platform/pull/2924)
+- Allow mutation elocument model on `getContent` [#2923](https://github.com/orchidsoftware/platform/issues/2923)
+- Refactored to modern PHP standards
+
+### Fixed
+- Loading `csrf` token for `axios` after login
+
+## 14.43.1 - 2024-11-09
+
+### Changed
+- Improve performance for simple model attribute [#2921](https://github.com/orchidsoftware/platform/pull/2921)
+
+## 14.43.0 - 2024-11-06
+
+### Added
+- Additional configuration parameters for Hotwire by default
+
+### Changed
+- The loading of modal windows in the browser has been redesigned. Now, upon invalidation, modal windows, including deferred ones, will automatically open.
+- Installed Psalm to run exclusively on GitHub Actions.
+- Set types to `static` in `Field`.
+
+### Fixed
+- Incorrect listeners names
+
+### Removed
+- Unused option when running PHPUnit
+
+## 14.42.0 - 2024-11-01
+
+### Changed
+- Restrict excessively long URLs in modal windows [#2917](https://github.com/orchidsoftware/platform/issues/2917)
+
+## 14.41.0 - 2024-10-29
+
+### Added
+- Template for grid columns on `Group` [#2913](https://github.com/orchidsoftware/platform/pull/2913)
+
+## 14.40.0 - 2024-10-28
+
+### Changed
+- Max and min width for sidebar 
+
+## 14.39.0 - 2024-10-24
+
+### Changed
+- Color favicon to monochrome
+- Improve install examples
+- Added `text-balance` for "Welcome Page"
+- Width for login form (large breakpoint)
+- Increment root font-size
+- Improve color on active item menu
+
+## 14.38.0 - 2024-10-23
+
+### Added
+- `addClass()` method to `Field` class for easier class manipulation [#2909](https://github.com/orchidsoftware/platform/pull/2909)
+
+### Changed
+- Padding for items `Selection`
+- Remove `memory_limit` for check max size upload [#2910](https://github.com/orchidsoftware/platform/issues/2910)
+
+## 14.37.0 - 2024-10-12
+
+### Added
+- Default balanced text style for `TD`
+- Property for word wrapping in table cells
+
+### Removed
+- Unused attributes on SimpleMDE
+
+### Fixed
+- Incorrect parsing of `HTML` in `SimpleMDE` field
+
+## 14.36.2 - 2024-10-11
+
+### Fixed
+- Incorrect parsing of `HTML` in `SimpleMDE` field
+
+## 14.36.1 - 2024-10-11
+
+### Fixed
+- Incorrect parsing of `HTML` in `SimpleMDE` field
+
+## 14.36.0 - 2024-09-27
+
+### Added
+- Secondary parameters for testing `Screen`
+- Missing group attribute for `Attach` field
+- Methods for define resources on packages
+- Autofill values on filters [#2895](https://github.com/orchidsoftware/platform/pull/2895)
+- Description for dont usage vendor user model
+
+### Changed
+- Changed stubs to usage `Attach` field
+- PHPStan issue when the return type of `Field::value` is `self` [#2898](https://github.com/orchidsoftware/platform/pull/2898)
+
+### Deprecated
+- `ComplexFieldConcern` interface and `isComplexFieldType` method in `TD` class
+
+### Fixed
+- Overlapping of part of the content in drop-down displayed list of fields in table
+- 12-hour format to 24-hour format of an hour with leading zeros [#2896](https://github.com/orchidsoftware/platform/pull/2896)
+
+## 14.35.1 - 2024-09-10
+
+### Fixed
+- Removed extra spans affecting indents
+
+## 14.34.0 - 2024-09-04
+
+### Changed
+- Adding state to the form when Turbo is disabled
+
+## 14.33.1 - 2024-09-04
+
+### Fixed
+- Attempt to attach a missing state on the page [#2892](https://github.com/orchidsoftware/platform/issues/2892)
+
+## 14.33.0 - 2024-09-02
+
+### Changed
+- Retrieve Screen inherited public properties from parent classes [#2880](https://github.com/orchidsoftware/platform/pull/2880)
+
+### Fixed
+- Broken assets
+
+## 14.32.0 - 2024-09-02
+
+### Added
+- New method `deferred` on `Modal` layout
+
+### Fixed
+- Preserve Relation field query order [#2668](https://github.com/orchidsoftware/platform/issues/2668)
+
+### Removed
+- Manual CSRF token handling on Turbo [#2889](https://github.com/orchidsoftware/platform/pull/2889)
+
+## 14.31.2 - 2024-08-30
+
+### Deprecated
+- `attachment` method for Eloquent models. Usage plural `attachments` instead.
+
+## 14.31.1 - 2024-08-30
+
+### Fixed
+- Disabled drag&drop input for `Attach` field [#2867](https://github.com/orchidsoftware/platform/issues/2867)
+- Missing state passing in the `listeners`
+
+## 14.31.0 - 2024-08-27
+
+### Added
+- Allow "aria-*" attributes in Fields [#2884](https://github.com/orchidsoftware/platform/pull/2884)
+
+### Fixed
+- Screen constructor property initialization during deserialization [#2885](https://github.com/orchidsoftware/platform/pull/2885)
+
+## 14.30.2 - 2024-08-23
+
+### Fixed
+- Dropdown menu in the table
+
+## 14.30.1 - 2024-08-22
+
+### Fixed
+- Safari stretched links in the table 
+- Dropdown menu in the table
+
+## 14.30.0 - 2024-08-21
+
+### Added
+- Separate trait for load models on database when restore state
+
+### Fixed
+- Safari doesn't support `position: relative` on `<tr`>` elements
+
+## 14.29.0 - 2024-08-18
+
+### Changed
+- Reduce Data Transfer for State Restore [#2872](https://github.com/orchidsoftware/platform/pull/2872)
+
+### Fixed
+- Public property stop filled when find `false` value
+
+## 14.28.2 - 2024-08-18
+
+### Fixed
+- SimpleMDE Field Incorrectly Marked as Empty When Using `required` Attribute [#2877](https://github.com/orchidsoftware/platform/issues/2877)
+
+## 14.28.1 - 2024-08-13
+
+### Fixed
+- Icon clipping issue at various ratios [#2846](https://github.com/orchidsoftware/platform/issues/2846)
+- Nested menu collapsing behavior [#2875](https://github.com/orchidsoftware/platform/issues/2875)
+
+## 14.28.0 - 2024-08-13
+
+### Added
+- Integrated `altInput` and `altFormat` attributes as recommended by the `flatpickr` package to enhance formatting capabilities. [#2873](https://github.com/orchidsoftware/platform/pull/2873)
+
+### Changed
+- Refactored protected method names and updated descriptions in `Field` class
+- Disabled `single_trait_insert_per_statement` option for `Pint`
+
+### Fixed
+- Drop-down behavior that caused it to either disappear or break the `Table` layout
+- The `maximumSelectionLength` option was not functioning correctly. The issue was resolved by adding the necessary parentheses. [#2873](https://github.com/orchidsoftware/platform/pull/2873)
+- Button text visibility issue when a loading spinner is active
+
+### Removed
+- Unused translation of the term from the project
+
+## 14.27.2 - 2024-07-30
+
+### Fixed
+- Revert `csrf` token on modal window
+
+## 14.27.1 - 2024-07-23
+
+### Fixed
+- Overflow drop-down on table
+
+## 14.27.0 - 2024-07-23
+
+### Added
+- `path` and `storage` attributes for the `Attach` field
+- Extended method for `Action`
+
+### Changed
+- Modal window no longer requires data definition before loading
+
+## 14.26.1 - 2024-06-30
+
+### Changed
+- Enhanced `zh_TW` language support [#2844](https://github.com/orchidsoftware/platform/pull/2844)
+
+### Fixed
+- Missing prefix for notification icon [#2848](https://github.com/orchidsoftware/platform/issues/2848)
+
 ## 14.26.0 - 2024-06-14
 
 ### Added

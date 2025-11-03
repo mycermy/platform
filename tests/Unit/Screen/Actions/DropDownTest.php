@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Orchid\Tests\Unit\Screen\Fields;
+namespace Orchid\Tests\Unit\Screen\Actions;
 
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
@@ -40,7 +40,7 @@ class DropDownTest extends TestFieldsUnitCase
                 Link::make('Item 1')->href('link-1'),
                 Link::make('Item 2')->href('link-2'),
             ])
-            ->build(new Repository())
+            ->build(new Repository)
             ->render();
 
         $this->assertStringContainsString('Item 1', $view);

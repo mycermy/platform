@@ -32,7 +32,7 @@ class ExampleLayoutsScreen extends Screen
      */
     public function description(): ?string
     {
-        return 'A comprehensive guide to the different layout options available.';
+        return 'A guide to designing and implementing layout options, from basics to advanced.';
     }
 
     /**
@@ -57,7 +57,7 @@ class ExampleLayoutsScreen extends Screen
         return [
 
             Layout::block(Layout::view('platform::dummy.block'))
-                ->title('Block header')
+                ->title('Block Header')
                 ->description('Excellent description that editing or views in block'),
 
             Layout::tabs([

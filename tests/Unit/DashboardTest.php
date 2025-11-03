@@ -17,46 +17,33 @@ class DashboardTest extends TestUnitCase
 {
     public function testIsVersion(): void
     {
-        $this->assertEquals(Dashboard::VERSION, Dashboard::version());
+        $this->assertNotEmpty(Dashboard::version());
     }
 
     public function testIsModelDefault(): void
     {
-        $class = Dashboard::modelClass('UnknownClass', User::class);
+        $dashboard = new Dashboard;
+        $class = $dashboard->modelClass('UnknownClass', User::class);
 
-        $default = new User();
+        $default = new User;
 
         $this->assertEquals($class, $default);
     }
 
     public function testIsModelCustomNotFound(): void
     {
-        Dashboard::useModel(User::class, 'MyCustomClass');
+        $dashboard = new Dashboard;
 
-        $user = Dashboard::modelClass(User::class);
+        $dashboard->useModel(User::class, 'MyCustomClass');
+
+        $user = $dashboard->modelClass(User::class);
 
         $this->assertEquals('MyCustomClass', $user);
     }
 
-    public function testIsModelConfigure(): void
-    {
-        Dashboard::configure([
-            'models' => [
-                User::class => 'MyCustomClass',
-            ],
-        ]);
-
-        $class = Dashboard::model(User::class);
-        $option = Dashboard::option('models.'.User::class);
-
-        $this->assertEquals('MyCustomClass', $class);
-        $this->assertEquals('MyCustomClass', $option);
-        $this->assertEquals(null, Dashboard::option('random'));
-    }
-
     public function testIsRegisterResource(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
 
         $script = $dashboard
             ->registerResource('scripts', 'app.js')
@@ -114,7 +101,7 @@ class DashboardTest extends TestUnitCase
 
     public function testRegisterMenuElement(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
 
         $view = $dashboard
             ->registerMenuElement(Menu::make('Item 1')->sort(3))
@@ -128,7 +115,7 @@ class DashboardTest extends TestUnitCase
 
     public function testAddMenuSubElements(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
 
         $view = $dashboard
             ->registerMenuElement(Menu::make('Item 1')->slug('item'))
@@ -143,12 +130,12 @@ class DashboardTest extends TestUnitCase
     protected function setUp(): void
     {
         parent::setUp();
-        Dashboard::configure([]);
+        \Orchid\Support\Facades\Dashboard::flush();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        Dashboard::configure([]);
+        \Orchid\Support\Facades\Dashboard::flush();
     }
 }

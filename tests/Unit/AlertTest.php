@@ -8,6 +8,7 @@ use Orchid\Support\Color;
 use Orchid\Support\Facades\Alert;
 use Orchid\Support\Facades\Toast;
 use Orchid\Tests\TestUnitCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Class AlertTest.
@@ -41,6 +42,7 @@ class AlertTest extends TestUnitCase
     /**
      * @dataProvider getLevels
      */
+    #[DataProvider('getLevels')]
     public function testShouldFlashLevelsAlert(string $level, string $css): void
     {
         Alert::$level('test');
@@ -52,6 +54,7 @@ class AlertTest extends TestUnitCase
     /**
      * @dataProvider getLevels
      */
+    #[DataProvider('getLevels')]
     public function testShouldFlashLevelsToast(string $level, string $css): void
     {
         Toast::$level('test');
@@ -69,6 +72,34 @@ class AlertTest extends TestUnitCase
         self::assertEquals('Hello Alexandr!', session('toast_notification.message'));
         self::assertEquals('false', session('toast_notification.auto_hide'));
         self::assertEquals('3000', session('toast_notification.delay'));
+    }
+
+    public function testToastShouldBePersistent(): void
+    {
+        Toast::info('Hello Alexandr!')
+            ->persistent();
+
+        self::assertEquals('Hello Alexandr!', session('toast_notification.message'));
+        self::assertEquals('false', session('toast_notification.auto_hide'));
+    }
+
+    public function testToastShouldBePersistentAlias(): void
+    {
+        Toast::info('Hello Alexandr!')
+            ->disableAutoHide();
+
+        self::assertEquals('Hello Alexandr!', session('toast_notification.message'));
+        self::assertEquals('false', session('toast_notification.auto_hide'));
+    }
+
+    public function testToastShouldSetDelayAndBePersistent(): void
+    {
+        Toast::info('Hello Alexandr!')
+            ->seconds(4)
+            ->persistent();
+
+        self::assertEquals('Hello Alexandr!', session('toast_notification.message'));
+        self::assertEquals('4000', session('toast_notification.delay'));
     }
 
     public function testShouldFlashViewAlert(): void

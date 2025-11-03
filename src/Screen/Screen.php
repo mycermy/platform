@@ -12,9 +12,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Orchid\Platform\Http\Controllers\Controller;
+use Orchid\Screen\Concerns\HasFillablePublicProperties;
+use Orchid\Screen\Concerns\InteractsWithEncryptedState;
 use Orchid\Screen\Layouts\Listener;
 use Orchid\Support\Facades\Dashboard;
 
@@ -26,7 +27,7 @@ use Orchid\Support\Facades\Dashboard;
  */
 abstract class Screen extends Controller
 {
-    use Commander;
+    use Commander, HasFillablePublicProperties, InteractsWithEncryptedState;
 
     /**
      * @param \Illuminate\Http\Request $request
@@ -79,24 +80,9 @@ abstract class Screen extends Controller
     }
 
     /**
-     * @var Repository
-     */
-    private $source;
-
-    /**
-     * The command buttons for this screen.
-     *
-     * @return Action[]
-     */
-    public function commandBar()
-    {
-        return [];
-    }
-
-    /**
      * The layout for this screen, consisting of a collection of views.
      *
-     * @return Layout[]
+     * @return iterable<\Orchid\Screen\Layout>|iterable<string>
      */
     abstract public function layout(): iterable;
 
@@ -126,12 +112,15 @@ abstract class Screen extends Controller
     {
         Dashboard::setCurrentScreen($this, true);
 
-        abort_unless(method_exists($this, $method), 404, "Async method: {$method} not found");
+        abort_unless(
+            static::getAvailableMethods()->contains($method),
+            Response::HTTP_BAD_REQUEST,
+            "Async method '{$method}' is unavailable."
+        );
 
         abort_unless($this->checkAccess(request()), static::unaccessed());
 
         $state = $this->extractState();
-
         $this->fillPublicProperty($state);
 
         $parameters = request()->collect()->merge([
@@ -159,45 +148,23 @@ abstract class Screen extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function asyncParticalLayout(Layout $layout, Request $request)
+    public function asyncParticalLayout(Listener $layout, Request $request): Response
     {
         Dashboard::setCurrentScreen($this, true);
 
         abort_unless($this->checkAccess(request()), static::unaccessed());
 
         $state = $this->extractState();
+        $this->fillPublicProperty($state);
 
         $repository = $layout->handle($state, $request);
 
         $view = $layout->build($repository).view('platform::partials.state', [
-            'state' => $this->serializeStateWithPublicProperties($state),
+            'state' => $this->serializableState(),
         ]);
 
         return response($view)
             ->header('Content-Type', 'text/vnd.turbo-stream.html');
-    }
-
-    /**
-     * This method extracts the state from a request parameter.
-     * If the '_state' parameter is missing, an empty Repository object is returned.
-     * Otherwise, the state is extracted from the encrypted '_state' parameter, deserialized and returned.
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface - If the container cannot provide the dependency injection for a class.
-     * @throws \Psr\Container\NotFoundExceptionInterface  - If the container cannot find a required dependency injection for a class.
-     *
-     * @return \Orchid\Screen\Repository - The extracted state.
-     */
-    protected function extractState(): Repository
-    {
-        $state = request()->post('_state', session()->get('_state'));
-        // Check if the '_state' parameter is missing
-        if ($state === null) {
-            // Return an empty Repository object
-            return new Repository();
-        }
-
-        //deserialize '_state' parameter
-        return Crypt::decrypt($state);
     }
 
     /**
@@ -218,25 +185,9 @@ abstract class Screen extends Controller
             'layouts'                 => $this->build($repository),
             'formValidateMessage'     => $this->formValidateMessage(),
             'needPreventsAbandonment' => $this->needPreventsAbandonment(),
-            'state'                   => $this->serializeStateWithPublicProperties($repository),
+            'state'                   => $this->serializableState(),
             'controller'              => $this->frontendController(),
         ]);
-    }
-
-    /**
-     * @param $repository
-     *
-     * @throws \Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException
-     *
-     * @return string
-     */
-    protected function serializableState(Repository $repository): string
-    {
-        if ($repository->isEmpty()) {
-            return '';
-        }
-
-        return Crypt::encrypt($repository);
     }
 
     /**
@@ -255,53 +206,6 @@ abstract class Screen extends Controller
     }
 
     /**
-     * Serializes the state of the object using the public properties specified in the given repository.
-     *
-     * @param \Orchid\Screen\Repository $repository The repository containing the public properties to be serialized.
-     *
-     * @throws \Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException
-     *
-     * @return string The serialized state of the object.
-     */
-    public function serializeStateWithPublicProperties(Repository $repository): string
-    {
-        if ($this->isScreenFullStatePreserved()) {
-            return $this->serializableState($repository);
-        }
-
-        $propertiesToSerialize = $repository->getMany($this->getPublicPropertyNames()->toArray());
-
-        return $this->serializableState(new Repository($propertiesToSerialize));
-    }
-
-    /**
-     * Fills the public properties of the object with values from the given repository.
-     *
-     * @param \Orchid\Screen\Repository $repository The repository containing the values to fill the properties with.
-     *
-     * @return void
-     */
-    protected function fillPublicProperty(Repository $repository): void
-    {
-        $this->getPublicPropertyNames()
-            ->each(fn (string $property) => $this->$property = $repository->get($property, $this->$property));
-    }
-
-    /**
-     * Retrieves the names of all public properties of the object.
-     *
-     * @return \Illuminate\Support\Collection The names of the public properties.
-     */
-    protected function getPublicPropertyNames(): Collection
-    {
-        $reflections = (new \ReflectionClass($this))->getProperties(\ReflectionProperty::IS_PUBLIC);
-
-        return collect($reflections)
-            ->filter(fn (\ReflectionProperty $property) => ! $property->isStatic())
-            ->map(fn (\ReflectionProperty $property) => $property->getName());
-    }
-
-    /**
      * Response or HTTP code that will be returned if user does not have access to the screen.
      *
      * @return int | \Symfony\Component\HttpFoundation\Response
@@ -312,9 +216,6 @@ abstract class Screen extends Controller
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
-     * @param                          ...$arguments
-     *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
@@ -366,7 +267,7 @@ abstract class Screen extends Controller
      */
     public function formValidateMessage(): string
     {
-        return __('Please check the entered data, it may be necessary to specify in other languages.');
+        return __('Unable to start action. Please check your input and try again.');
     }
 
     /**
@@ -378,24 +279,10 @@ abstract class Screen extends Controller
     }
 
     /**
-     * Check if the screen state preservation feature is enabled.
-     * Returns true if enabled, false otherwise.
-     */
-    public function isScreenFullStatePreserved(): bool
-    {
-        /** @var Layout $layout */
-        $existListenerLayout = collect($this->layout())
-            ->map(fn ($layout) => is_object($layout) ? $layout : resolve($layout))
-            ->map(fn (Layout $layout) => $layout->findByType(Listener::class))
-            ->filter()
-            ->isNotEmpty();
-
-        return config('platform.full_state', $existListenerLayout);
-    }
-
-    /**
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * Calls the specified method with the given parameters.
+     *
      * @throws \ReflectionException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return mixed
      */
@@ -482,7 +369,7 @@ abstract class Screen extends Controller
             return back();
         }
 
-        return $this->backWith($currentState->all());
+        return back()->with('_state', $this->serializableState());
     }
 
     /**
@@ -496,9 +383,9 @@ abstract class Screen extends Controller
      */
     public function backWith(array $data): RedirectResponse
     {
-        $repository = new Repository($data);
+        $this->fillPublicProperty(new Repository($data));
 
-        return back()->with('_state', $this->serializableState($repository));
+        return back()->with('_state', $this->serializableState());
     }
 
     /**
@@ -513,5 +400,68 @@ abstract class Screen extends Controller
     public function frontendController(): string
     {
         return 'base';
+    }
+
+    /**
+     * Reinitialized uninitialized properties with their default values.
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \ReflectionException
+     */
+    public function __wakeup(): void
+    {
+        // Create a fresh instance to retrieve default property values
+        $defaultInstance = app()->make(static::class);
+
+        $defaultProperties = $this->getPropertiesWithValues($defaultInstance);
+        $currentProperties = (new \ReflectionClass($this))->getProperties();
+
+        foreach ($currentProperties as $property) {
+            // Skip if the property is already initialized
+            if ($property->isInitialized($this)) {
+                continue;
+            }
+
+            $propertyName = $property->getName();
+
+            // Skip if there's no default value for the property
+            if (! $defaultProperties->has($propertyName)) {
+                continue;
+            }
+
+            // Set the property to its default value
+            $property->setValue($this, $defaultProperties->get($propertyName));
+        }
+    }
+
+    /**
+     * Returns an associative array of property names and their values for the given object.
+     *
+     * @param object $object
+     *
+     * @throws \ReflectionException
+     *
+     * @return Collection
+     */
+    private function getPropertiesWithValues(object $object): Collection
+    {
+        $reflection = new \ReflectionClass($object);
+
+        return collect($reflection->getProperties())
+            ->mapWithKeys(function (\ReflectionProperty $property) use ($object) {
+                $property->setAccessible(true); // Ensure we can access private/protected properties
+
+                return [$property->getName() => $property->getValue($object)];
+            });
+    }
+
+    /**
+     * Returns an array of public property names for serialization.
+     *
+     * @return array
+     */
+    public function __sleep(): array
+    {
+        return $this->getPublicPropertyNames()->all();
     }
 }

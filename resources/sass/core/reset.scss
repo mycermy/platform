@@ -10,7 +10,7 @@ body {
   line-height: $line-height-base;
 }
 
-*:focus {
+*:focus:not(:focus-visible) {
   outline: 0 !important;
 }
 
@@ -55,12 +55,16 @@ small, .small {
 }
 
 .badge {
-  &.up {
-    position: relative;
-    top: -10px;
-    padding: 3px 6px;
-    margin-left: -10px;
-  }
+    display: inline-flex;
+    align-items: center;
+    align-content: center;
+
+    &.up {
+        position: relative;
+        top: -10px;
+        padding: 3px 6px;
+        margin-left: -10px;
+    }
 }
 
 blockquote {
@@ -275,10 +279,9 @@ blockquote {
 
       .nav-link {
           width: 100%;
-
           &:hover,
           &:focus {
-              border-radius: unset;
+            //  border-radius: unset;
           }
       }
   }
@@ -293,47 +296,9 @@ blockquote {
   }
 }
 
-.nav-tabs {
-  .nav-item {
-    &:hover .nav-link,
-    &.active .nav-link,
-    &.active .nav-link:hover {
-      border-bottom-color: $primary;
-    }
-    &.active .nav-link {
-      border-bottom-color: $primary;
-    }
-  }
-  .nav-tabs-alt & {
-    &.nav-justified {
-      .nav-item {
-        display: table-cell;
-        width: 1%;
-      }
-    }
-    .nav-item {
-      .nav-link {
-        padding: 0.5rem 1.5rem;
-        border-radius: 0;
-        border-color: transparent !important;
-        background: transparent !important;
-		&.active {
-			border-bottom-color: $primary !important;
-            cursor: default;
-		}
-      }
-      &.active {
-        .nav-link {
-          border-bottom-color: $primary !important;
-        }
-      }
-    }
-  }
-}
-
 
 @include media-breakpoint-down(md) {
-    .nav-tabs-scroll-bar {
+    .nav-scroll-bar {
         display: inline-block !important;
         list-style: none;
         margin: 0;
@@ -464,6 +429,13 @@ blockquote {
   > tbody,
   > tfoot {
     > tr {
+        &:has(.stretched-link) {
+            // Safari doesn't support position: relative on <tr> elements
+            position: relative;
+            transform: translate(0);
+            clip-path: inset(0);
+            overflow: clip;
+        }
       > td {
         padding: 8px 15px;
         border-top: 1px solid $table-border-color;
@@ -580,12 +552,6 @@ blockquote {
   }
 }
 
-.dropdown-scrollable {
-  height: auto;
-  max-height: 400px;
-  overflow-x: hidden;
-}
-
 .btn-group > .btn {
   margin-left: -1px;
 }
@@ -674,7 +640,7 @@ blockquote {
 
 .sub-menu {
     width: 100%;
-    display: block;
+    display: flex;
     transition: all .4s ease-in-out 0s;
 
     .dropdown-item {
@@ -723,3 +689,30 @@ legend {
         }
     }
 }
+
+
+@include color-mode(dark) {
+    .nav-pills {
+        --#{$prefix}nav-link-bg: #{rgba(lighten($grey, 10), 0.25)};
+        --#{$prefix}nav-pills-link-active-bg:#{rgba(lighten($grey, 10), 0.25)};
+    }
+}
+
+.nav-pills {
+    --#{$prefix}nav-link-bg: #{$body-bg};
+    --#{$prefix}nav-pills-link-active-bg: #{$body-bg};
+
+    > li {
+        > a {
+            transition: all 340ms;
+            color: var(--bs-text-body-emphasis)!important;
+            &:hover,
+            &:focus {
+                color: var(--bs-text-body-emphasis)!important;
+                background-color: var(--bs-nav-link-bg)!important;
+                @extend .rounded;
+            }
+        }
+    }
+}
+

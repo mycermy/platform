@@ -55,7 +55,7 @@ class Builder
     public function __construct(iterable $fields, ?Repository $data = null)
     {
         $this->fields = collect($fields)->all();
-        $this->data = $data ?? new Repository();
+        $this->data = $data ?? new Repository;
     }
 
     /**
@@ -102,7 +102,11 @@ class Builder
     private function renderGroup(Groupable $group)
     {
         $prepare = collect($group->getGroup())
-            ->map(fn ($field) => $this->render($field))
+            ->map(function ($field) {
+                return is_subclass_of($field, Groupable::class)
+                    ? $this->renderGroup($field)
+                    : $this->render($field);
+            })
             ->filter()
             ->toArray();
 
@@ -145,7 +149,7 @@ class Builder
         $bindValueName = rtrim($name, '.');
         $attributes['value'] = $this->getValue($bindValueName, $attributes['value'] ?? null);
 
-        //set prefix
+        // set prefix
         if ($attributes['prefix'] !== null) {
             $name = '.'.$name;
         }

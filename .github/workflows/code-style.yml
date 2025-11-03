@@ -1,7 +1,8 @@
-name: Check & fix styling
+name: Coding Guidelines
 
 on:
-  push: # (or pull requests)
+  pull_request:
+  push:
     paths:
       - '.github/workflows/**'
       - '**.php'
@@ -15,14 +16,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
 
       - name: Setup PHP 🔧
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.3
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
           coverage: none
           tools: composer:v2
@@ -36,6 +37,6 @@ jobs:
         run: vendor/bin/pint
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Fixed code style

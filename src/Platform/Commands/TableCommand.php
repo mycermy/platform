@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Orchid\Platform\Commands;
 
-use Illuminate\Console\GeneratorCommand;
-use Orchid\Platform\Dashboard;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'orchid:table')]
 class TableCommand extends GeneratorCommand
 {
     /**
@@ -35,7 +35,7 @@ class TableCommand extends GeneratorCommand
      */
     protected function getStub(): string
     {
-        return Dashboard::path('stubs/table.stub');
+        return $this->resolveStubPath('table.stub');
     }
 
     /**

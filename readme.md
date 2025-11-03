@@ -8,7 +8,7 @@
 Orchid is a free [Laravel](https://laravel.com) package that abstracts standard business logic and allows code-driven rapid application development of back-office applications, admin/user panels, and dashboards.
 
 <p align="center">
-<a href="https://github.com/orchidsoftware/platform/actions"><img src="https://github.com/orchidsoftware/platform/workflows/Tests/badge.svg"></a>
+<a href="https://github.com/orchidsoftware/platform/actions"><img src="https://github.com/orchidsoftware/platform/actions/workflows/phpunit.yml/badge.svg"></a>
 <a href="https://codecov.io/gh/orchidsoftware/platform"><img src="https://codecov.io/gh/orchidsoftware/platform/branch/master/graph/badge.svg" /></a>
 <a href="https://packagist.org/packages/orchid/platform"><img alt="Packagist" src="https://img.shields.io/packagist/dt/orchid/platform.svg"></a>
 <a href="https://opencollective.com/orchid"><img src="https://img.shields.io/opencollective/all/orchid" alt="Open Collective backers and sponsors"></a>
@@ -23,7 +23,7 @@ Orchid is a free [Laravel](https://laravel.com) package that abstracts standard 
 
 - **Fast Loading Times** - Enjoy an SPA like performance! Transitions can be made without reloading a page and require no additional code. Thanks to the [Hotwire](https://hotwire.dev/) project, Orchid makes this a satisfying experience for both users and developers.
 
-- **Access Permissions & Roles** - Take advantage of [granular access permissions](https://orchid.software/en/docs/access/), based on a user’s identity and corresponding role membership.
+- **Access Permissions & Roles** - Take advantage of [access permissions](https://orchid.software/en/docs/access/), based on a user’s identity and corresponding role membership.
 
 - **Filtering & Sorting** - Offer users the ability to filter and sort data quickly! Orchid uses an [Eloquent based filtering/sorting approach](https://orchid.software/en/docs/quickstart-sort-filter-table/).
 

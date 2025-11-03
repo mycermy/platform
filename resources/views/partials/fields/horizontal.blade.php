@@ -1,29 +1,43 @@
-<div class="form-group row row-cols-sm-2 align-items-baseline">
-    @isset($title)
-        <label for="{{$id}}" class="col-sm-3 text-wrap form-label">
-            {{$title}}
+<div class="form-group row row-cols-sm-2 align-items-stretch">
+    @if($field->has('title'))
+        <label for="{{ $field->get('id') }}" class="col-sm-3 text-wrap form-label text-balance">
+            {{ $field->get('title') }}
 
-            <x-orchid-popover :content="$popover ?? ''"/>
+            <x-orchid-popover :content="$field->get('popover', '')"/>
 
-            @if(isset($attributes['required']) && $attributes['required'])
+            @if($field->get('required', false))
                 <sup class="text-danger">*</sup>
             @endif
         </label>
-    @endisset
+    @endif
 
     <div class="col col-md-8">
-        {{$slot}}
+        {!! $slot !!}
 
-        @if($errors->has($oldName))
+        @php
+            // Backport for consistent error handling behavior between Laravel 10 and 11.
+            // This implementation will be modified in a future major version.
+
+            // Retrieve all errors from the $errors object and convert them into a collection
+            $allErrors = collect($errors->all());
+
+            // Check if there is a 'default' error key in the collection of errors
+            if ($allErrors->has('default')) {
+                // If a 'default' error exists, assign it to the $errors variable
+                $errors = $allErrors->get('default');
+            }
+        @endphp
+
+        @if($errors->has($field->getOldName()))
             <div class="invalid-feedback d-block">
-                <small>{{$errors->first($oldName)}}</small>
+                <small>{{ $errors->first($field->getOldName()) }}</small>
             </div>
-        @elseif(isset($help))
-            <small class="form-text text-muted">{!!$help!!}</small>
+        @elseif($field->has('help'))
+            <small class="form-text text-muted">{!! $field->get('help') !!}</small>
         @endif
     </div>
 </div>
 
-@isset($hr)
+@if($field->get('hr'))
     <div class="line line-dashed border-bottom my-3"></div>
-@endisset
+@endif

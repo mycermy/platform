@@ -52,9 +52,9 @@ class Repository extends \Illuminate\Config\Repository implements Countable
      * @param $key
      * @param $value
      *
-     * @return $this|void
+     * @return $this
      */
-    public function set($key, $value = null)
+    public function set($key, $value = null): self
     {
         parent::set($key, $value);
 
@@ -67,5 +67,12 @@ class Repository extends \Illuminate\Config\Repository implements Countable
     public function isEmpty(): bool
     {
         return $this->count() === 0;
+    }
+
+    public static function elements(array $items): array
+    {
+        return collect($items)
+            ->map(fn ($item) => new self($item))
+            ->all();
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\View;
+use Orchid\Screen\Concerns\HasTranslations;
 use Orchid\Screen\Concerns\Makeable;
 use Orchid\Screen\Contracts\Fieldable;
 use Orchid\Screen\Exceptions\FieldRequiredAttributeException;
@@ -21,20 +22,20 @@ use Throwable;
 /**
  * Class Field.
  *
- * @method self accesskey($value = true)
- * @method self class($value = true)
- * @method self dir($value = true)
- * @method self hidden($value = true)
- * @method self id($value = true)
- * @method self lang($value = true)
- * @method self spellcheck($value = true)
- * @method self style($value = true)
- * @method self tabindex($value = true)
- * @method self autocomplete($value = true)
+ * @method static accesskey($value = true)
+ * @method static class($value = true)
+ * @method static dir($value = true)
+ * @method static hidden($value = true)
+ * @method static id($value = true)
+ * @method static lang($value = true)
+ * @method static spellcheck($value = true)
+ * @method static style($value = true)
+ * @method static tabindex($value = true)
+ * @method static autocomplete($value = true)
  */
 class Field implements Fieldable, Htmlable
 {
-    use CanSee, Conditionable, Macroable, Makeable {
+    use CanSee, Conditionable, HasTranslations, Macroable, Makeable {
         Macroable::__call as macroCall;
     }
 
@@ -54,7 +55,8 @@ class Field implements Fieldable, Htmlable
     protected $view;
 
     /**
-     * All attributes that are available to the field.
+     * An array containing all attributes available to the field.
+     * Attributes are used to configure the HTML form element.
      *
      * @var array
      */
@@ -72,12 +74,20 @@ class Field implements Fieldable, Htmlable
     ];
 
     /**
-     * Vertical or Horizontal
-     * bootstrap forms.
+     * The default layout wrapper view for the field.
+     *
+     * This property holds the Blade view path or Closure that defines
+     * the layout used to wrap the field when rendering.
+     *
+     * It provides the standard wrapper including label, help text, and validation feedback.
+     *
+     * Set to `null` to disable the wrapper and render the field without any additional markup.
+     *
+     * This value can be overridden in subclasses to customize the wrapper.
      *
      * @var Closure|string|null
      */
-    protected $typeForm;
+    protected $typeForm = 'platform::partials.fields.vertical';
 
     /**
      * A set of attributes for the assignment
@@ -111,6 +121,7 @@ class Field implements Fieldable, Htmlable
         'xml:lang',
         'autocomplete',
         'data-*',
+        'aria-*',
     ];
 
     /**
@@ -142,21 +153,24 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * @param mixed $value
+     * Sets the 'value' attribute of the field.
      *
-     * @return static
+     * @param mixed $value The value to be set for the 'value' attribute.
      */
-    public function value($value): self
+    public function value(mixed $value): static
     {
         return $this->set('value', $value);
     }
 
     /**
-     * @param mixed $value
+     * Sets the value for the specified attribute of the field.
      *
-     * @return static
+     * @param string $key   The name of the attribute to set.
+     * @param mixed  $value The value of the attribute. Defaults to true.
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    public function set(string $key, $value = true): self
+    public function set(string $key, $value = true): static
     {
         $this->attributes[$key] = $value;
 
@@ -164,11 +178,13 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * @throws Throwable
+     * Validates that all required attributes are present in the field.
      *
-     * @return static
+     * @throws FieldRequiredAttributeException if any required attribute is missing.
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    protected function checkRequired(): self
+    protected function ensureRequiredAttributesArePresent(): static
     {
         collect($this->required)
             ->filter(fn ($attribute) => ! array_key_exists($attribute, $this->attributes))
@@ -180,6 +196,8 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
+     * Renders the field.
+     *
      * @throws Throwable
      *
      * @return Factory|View|mixed
@@ -191,41 +209,44 @@ class Field implements Fieldable, Htmlable
         }
 
         $this
-            ->checkRequired()
-            ->modifyName()
-            ->modifyValue()
+            ->ensureRequiredAttributesArePresent()
+            ->customizeFieldName()
+            ->updateFieldValue()
             ->runBeforeRender()
-            ->translate()
-            ->checkError();
+            ->translateAttributes()
+            ->markFieldWithError()
+            ->generateId();
 
-        $id = $this->getId();
-        $this->set('id', $id);
-
-        $errors = $this->getErrorsMessage();
-
-        return view($this->view, array_merge($this->getAttributes(), [
+        $slot = view($this->view, array_merge($this->getAttributes(), [
             'attributes'     => $this->getAllowAttributes(),
             'dataAttributes' => $this->getAllowDataAttributes(),
-            'id'             => $id,
             'old'            => $this->getOldValue(),
-            'slug'           => $this->getSlug(),
             'oldName'        => $this->getOldName(),
-            'typeForm'       => $this->typeForm ?? $this->vertical()->typeForm,
         ]))
-            ->withErrors($errors);
+            ->withErrors($this->getErrorsMessage());
+
+        if (! $this->typeForm) {
+            return $slot;
+        }
+
+        return view($this->typeForm, [
+            'slot'  => $slot,
+            'field' => $this,
+        ])
+            ->withErrors($this->getErrorsMessage());
     }
 
     /**
-     * Localization of fields.
+     * Translates the field's attributes if necessary.
      *
      * @return static
      */
-    private function translate(): self
+    private function translateAttributes(): static
     {
         $lang = $this->get('lang');
 
         collect($this->attributes)
-            ->intersectByKeys(array_flip($this->translations))
+            ->filter(fn ($value, $key) =>  is_string($value) && $this->shouldTranslate($key))
             ->each(function ($value, $key) use ($lang) {
                 $translation = __($value, [], $lang);
                 $this->set($key, is_string($translation) ? $translation : $value);
@@ -234,11 +255,21 @@ class Field implements Fieldable, Htmlable
         return $this;
     }
 
+    /**
+     * Gets the field's attributes.
+     *
+     * @return array
+     */
     public function getAttributes(): array
     {
         return $this->attributes;
     }
 
+    /**
+     * Gets the allowed attributes for the field.
+     *
+     * @return ComponentAttributeBag
+     */
     protected function getAllowAttributes(): ComponentAttributeBag
     {
         $allow = array_merge($this->universalAttributes, $this->inlineAttributes);
@@ -251,27 +282,42 @@ class Field implements Fieldable, Htmlable
             ->merge($attributes);
     }
 
+    /**
+     * Gets the allowed data attributes for the field.
+     *
+     * @return ComponentAttributeBag
+     */
     protected function getAllowDataAttributes(): ComponentAttributeBag
     {
         return $this->getAllowAttributes()->filter(fn ($value, $key) => Str::startsWith($key, 'data-'));
     }
 
     /**
-     * @return string
+     * Generates a field ID if not already set.
+     *
+     * @param string $defaultId The default ID to set if none is provided.
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    protected function getId(): ?string
+    public function generateId(): static
     {
-        $id = $this->get('id');
-
-        if ($id !== null) {
-            return (string) $id;
+        if (! empty($this->get('id'))) {
+            return $this;
         }
 
-        $lang = $this->get('lang');
-        $slug = $this->get('name');
-        $hash = sha1(json_encode($this->getAttributes()));
+        $hash = hash(
+            'xxh3',
+            json_encode($this->getAttributes())
+        );
 
-        return Str::slug("field-$lang-$slug-$hash");
+        $id = collect([
+            'field',
+            $this->get('lang'),
+            $this->get('name'),
+            $hash,
+        ])->implode('-');
+
+        return $this->set('id', Str::slug($id));
     }
 
     /**
@@ -284,9 +330,26 @@ class Field implements Fieldable, Htmlable
         return $this->attributes[$key] ?? $value;
     }
 
-    protected function getSlug(): string
+    /**
+     * @param mixed|null $value
+     *
+     * @return static|mixed|null
+     */
+    public function has(string $key)
     {
-        return Str::slug($this->get('name'));
+        return ! empty($this->get($key));
+    }
+
+    /**
+     * Retrieve the unique ID assigned to this action element.
+     *
+     * If the ID is not explicitly set, this method returns `null`.
+     *
+     * @return string|null The ID of the action element, or null if not set.
+     */
+    protected function getId(): ?string
+    {
+        return $this->get('id');
     }
 
     /**
@@ -299,6 +362,11 @@ class Field implements Fieldable, Htmlable
         return old($this->getOldName());
     }
 
+    /**
+     * Gets the old value of the field.
+     *
+     * @return mixed
+     */
     public function getOldName(): string
     {
         return Str::of($this->get('name'))
@@ -309,11 +377,14 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * Checking for errors and filling css class.
+     * Marks the field as having an error by appending the 'is-invalid' CSS class.
      *
-     * @return $this
+     * If the field has an error (determined by the hasError() method),
+     * it appends the 'is-invalid' class to the existing 'class' attribute.
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    private function checkError(): self
+    private function markFieldWithError(): static
     {
         if (! $this->hasError()) {
             return $this;
@@ -324,15 +395,26 @@ class Field implements Fieldable, Htmlable
         return $this->set('class', $class.' is-invalid');
     }
 
+    /**
+     * Checks if the field has an error.
+     *
+     * @return bool
+     */
     private function hasError(): bool
     {
         return optional(session('errors'))->has($this->getOldName()) ?? false;
     }
 
     /**
-     * @return static
+     * Modifies the 'name' attribute of the field by adding a prefix and/or language identifier if they are set.
+     *
+     * If both prefix and language are set, the name will be modified as "prefix[lang]name".
+     * If only the prefix is set, the name will be modified as "prefixname".
+     * If only the language is set, the name will be modified as "lang[name]".
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    protected function modifyName()
+    protected function customizeFieldName(): static
     {
         $name = $this->get('name');
         $prefix = $this->get('prefix');
@@ -354,9 +436,14 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * @return static
+     * Modifies the 'value' attribute of the field.
+     *
+     * Retrieves the old value using the getOldValue() method, falling back to the current 'value' attribute if no old value is found.
+     * If the value is a Closure, it will be executed with the current attributes and its result will be used as the value.
+     *
+     * @return static Returns the current instance for method chaining.
      */
-    protected function modifyValue(): self
+    protected function updateFieldValue(): static
     {
         $value = $this->getOldValue() ?? $this->get('value');
 
@@ -372,7 +459,7 @@ class Field implements Fieldable, Htmlable
      *
      * @return static
      */
-    public function vertical(): self
+    public function vertical(): static
     {
         $this->typeForm = 'platform::partials.fields.vertical';
 
@@ -384,7 +471,7 @@ class Field implements Fieldable, Htmlable
      *
      * @return static
      */
-    public function clear(): self
+    public function clear(): static
     {
         $this->typeForm = 'platform::partials.fields.clear';
 
@@ -396,9 +483,21 @@ class Field implements Fieldable, Htmlable
      *
      * @return static
      */
-    public function horizontal(): self
+    public function horizontal(): static
     {
         $this->typeForm = 'platform::partials.fields.horizontal';
+
+        return $this;
+    }
+
+    /**
+     * Use hidden layout for the field.
+     *
+     * @return $this
+     */
+    public function hiddenFormType(): static
+    {
+        $this->typeForm = 'platform::partials.fields.hidden';
 
         return $this;
     }
@@ -408,9 +507,9 @@ class Field implements Fieldable, Htmlable
      *
      * @return $this
      */
-    public function withoutFormType(): self
+    public function withoutFormType(): static
     {
-        $this->typeForm = static fn (array $attributes) => $attributes['slot'];
+        $this->typeForm = null;
 
         return $this;
     }
@@ -420,7 +519,7 @@ class Field implements Fieldable, Htmlable
      *
      * @return static
      */
-    public function hr(): self
+    public function hr(): static
     {
         $this->set('hr');
 
@@ -428,9 +527,13 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
+     * Adds a closure to be executed before rendering the field.
+     *
+     * @param Closure $closure The closure to be executed before rendering.
+     *
      * @return static
      */
-    public function addBeforeRender(Closure $closure)
+    public function addBeforeRender(Closure $closure): static
     {
         $this->beforeRender[] = $closure;
 
@@ -438,11 +541,12 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * Alternately performs all tasks.
+     * Performs all tasks added to be executed before rendering the field.
      *
-     * @return $this
+     * This method iterates over each closure added via addBeforeRender() method
+     * and executes them in the context of the current field instance.
      */
-    public function runBeforeRender(): self
+    public function runBeforeRender(): static
     {
         foreach ($this->beforeRender as $before) {
             $before->call($this);
@@ -451,15 +555,23 @@ class Field implements Fieldable, Htmlable
         return $this;
     }
 
-    private function getErrorsMessage(): array
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     *
+     * @return \Closure|mixed|object|null
+     */
+    private function getErrorsMessage()
     {
-        $errors = session()->get('errors', new MessageBag());
-
-        return $errors->getMessages();
+        return session()->get('errors', new MessageBag());
     }
 
     /**
+     * Converts the field to a string by rendering it.
+     *
      * @throws Throwable
+     *
+     * @return string
      */
     public function __toString(): string
     {
@@ -477,29 +589,31 @@ class Field implements Fieldable, Htmlable
     }
 
     /**
-     * Apply the callback if the value is truthy.
+     * Converts the field to an HTML string.
      *
-     * @param bool     $condition
-     * @param callable $callback
-     *
-     * @return $this
-     */
-    public function when(bool $condition, callable $callback)
-    {
-        if ($condition) {
-            $callback($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @throws \Throwable
+     * @throws Throwable
      *
      * @return string
      */
     public function toHtml()
     {
         return $this->render()->toHtml();
+    }
+
+    /**
+     * Add a class to the field including the existing classes.
+     *
+     * @param string|array $classes
+     *
+     * @return static
+     */
+    public function addClass(string|array $classes): static
+    {
+        $currentClasses = array_filter(explode(' ', $this->get('class', '')));
+        $newClasses = is_array($classes) ? $classes : explode(' ', $classes);
+
+        $mergedClasses = array_unique(array_merge($currentClasses, $newClasses));
+
+        return $this->set('class', implode(' ', array_filter($mergedClasses)));
     }
 }

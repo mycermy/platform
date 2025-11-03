@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Orchid\Tests\Unit;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Orchid\Platform\Dashboard;
 use Orchid\Platform\ItemPermission;
 use Orchid\Platform\Models\Role;
@@ -114,7 +115,7 @@ class PermissionTest extends TestUnitCase
      */
     public function testIsRegisteredPermission(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
 
         $permission = ItemPermission::group('Test')
             ->addPermission('test', 'Test Description');
@@ -129,7 +130,7 @@ class PermissionTest extends TestUnitCase
      */
     public function testGetPermissionsByGroup(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
 
         $permissionA = ItemPermission::group('Test-A')
             ->addPermission('test_a', 'Test Description A');
@@ -149,7 +150,7 @@ class PermissionTest extends TestUnitCase
      */
     public function testIsWasRemovedPermission(): void
     {
-        $dashboard = new Dashboard();
+        $dashboard = new Dashboard;
         $permission = ItemPermission::group('Test')
             ->addPermission('test', 'Test Description');
         $dashboard->registerPermissions($permission);
@@ -386,5 +387,36 @@ class PermissionTest extends TestUnitCase
         $this->assertEquals(2, $users->count());
         $this->assertTrue($users->contains($user));
         $this->assertTrue($users->contains($userAlt));
+    }
+
+    public function testCountRoleCorrectPermissionCount(): void
+    {
+        $role = $this->createRole();
+
+        $this->assertEquals(2, $role->getCountPermissions());
+    }
+
+    public function testGetStatusPermissionReturnsAllPermissionsWithCorrectActiveFlags(): void
+    {
+        $user = User::factory()->create([
+            'permissions' => [
+                'platform.systems.attachment' => true,
+            ],
+        ]);
+
+        $expectedPermissions = \Orchid\Support\Facades\Dashboard::getPermission()
+            ->map
+            ->map(function ($permission) {
+                $permission['active'] = in_array($permission['slug'], [
+                    'platform.systems.attachment',
+                ]);
+
+                return $permission;
+            });
+
+        $resultPermissions = $user->getStatusPermission();
+
+        $this->instance(Collection::class, $resultPermissions);
+        $this->assertEquals($expectedPermissions, $resultPermissions);
     }
 }

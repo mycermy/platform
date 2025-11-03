@@ -15,7 +15,7 @@
         >
             <div class="dropdown-toggle" data-action="click->filter#onMenuClick"
                  data-filter-target="filterItem">
-                <div class="p-3 w-md">
+                <div class="p-3 w-md d-flex flex-column gap-3">
                     @foreach($filters as $filter)
                         {!! $filter->render() !!}
                     @endforeach
@@ -35,9 +35,9 @@
     @foreach($filters as $filter)
         @if($filter->isApply())
             <a href="{{ $filter->resetLink() }}"
-               class="badge bg-light border me-1 p-1 d-inline-flex align-items-center">
+               class="badge bg-light border me-1 d-inline-flex align-items-center link-body-emphasis gap-1">
                 <span>{{$filter->value()}}</span>
-                <x-orchid-icon path="bs.x-lg" class="ms-1"/>
+                <x-orchid-icon path="bs.x-lg"/>
             </a>
         @endif
     @endforeach

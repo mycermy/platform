@@ -31,7 +31,7 @@ class HttpFilterTest extends TestUnitCase
             'sort' => 'foobar',
         ]);
 
-        $filter = new HttpFilter();
+        $filter = new HttpFilter;
         $this->assertTrue($filter->isSort('foobar'));
 
         $sql = $this->getModelBuilder()->toSql();
@@ -47,9 +47,8 @@ class HttpFilterTest extends TestUnitCase
             ],
         ]);
 
-        $sql = $this->getModelBuilder()->toSql();
-
-        $this->assertStringContainsString('"Like" like ?', $sql);
+        $this->assertStringContainsString('"Like" like ?', $this->getModelBuilder()->toSql());
+        $this->assertContains('%qux%', $this->getModelBuilder()->getBindings());
     }
 
     public function testIlike(): void
@@ -60,9 +59,8 @@ class HttpFilterTest extends TestUnitCase
             ],
         ]);
 
-        $sql = $this->getModelBuilder()->toSql();
-
-        $this->assertStringContainsString('"Ilike" ILIKE ?', $sql);
+        $this->assertStringContainsString('"Ilike" ILIKE ?', $this->getModelBuilder()->toSql());
+        $this->assertContains('%qux%', $this->getModelBuilder()->getBindings());
     }
 
     public function testWhereIn(): void

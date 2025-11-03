@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Orchid\Platform\Commands;
 
-use Illuminate\Console\GeneratorCommand;
-use Orchid\Platform\Dashboard;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'orchid:tab-menu')]
 class TabMenuCommand extends GeneratorCommand
 {
     /**
@@ -35,7 +35,7 @@ class TabMenuCommand extends GeneratorCommand
      */
     protected function getStub(): string
     {
-        return Dashboard::path('stubs/tabMenu.stub');
+        return $this->resolveStubPath('tabMenu.stub');
     }
 
     /**

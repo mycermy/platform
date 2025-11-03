@@ -3,12 +3,12 @@
     <div class="row g-0">
         <div class="col col-lg-7 mt-6 p-4">
 
-            <h2 class="text-dark fw-light lh-lg">
+            <h2 class="text-body-emphasis fw-light">
                 Hello, It’s Great to See You!
             </h2>
 
-            <p>
-                It is a fascinating project, and it’s easy enough to use that you might wish to dive right in.<br>
+            <p class="text-balance">
+                It is a fascinating project, and it’s easy enough to use that you might wish to dive right in.
                 You are minutes away from creativity than ever before. Enjoy!
             </p>
         </div>
@@ -20,13 +20,13 @@
         </div>
     </div>
 
-    <div class="row bg-light m-0 p-md-4 p-3 border-top rounded-bottom g-md-5">
+    <div class="row bg-light m-0 p-md-4 p-3 border-top rounded-bottom g-md-5 text-balance">
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.book"/>
 
-                <span class="ms-3 text-dark">Explore the Documentation</span>
+                <span class="text-body-emphasis lh-1">Explore the Documentation</span>
             </h3>
             <p class="ms-md-5 ps-md-1">
                 Ready to unleash your coding potential? Our platform built on the Laravel framework is user-friendly and
@@ -36,10 +36,10 @@
         </div>
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.rocket"/>
 
-                <span class="ms-3 text-dark">Quick Start Guide</span>
+                <span class="text-body-emphasis lh-1">Quick Start Guide</span>
             </h3>
             <p class="ms-md-5 ps-md-1">
                 Are you entirely new to Laravel Orchid? Don't worry, we all were once. For a quick study of the main
@@ -48,10 +48,10 @@
         </div>
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.collection"/>
 
-                <span class="ms-3 text-dark">The Screens</span>
+                <span class="text-body-emphasis lh-1">The Screens</span>
             </h3>
             <p class="ms-md-5 ps-md-1">
                 Screen design is hierarchical and declarative, rather than physical and imperative. You specify what
@@ -61,10 +61,10 @@
         </div>
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.window-sidebar"/>
 
-                <span class="ms-3 text-dark">Layouts</span>
+                <span class="text-body-emphasis lh-1">Layouts</span>
             </h3>
             <p class="ms-md-5 ps-md-1">
                 It allows you to express many details so that the user interface can be interpreted and generated
@@ -74,10 +74,10 @@
         </div>
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.star"/>
 
-                <span class="ms-3 text-dark">And one more thing</span>
+                <span class="text-body-emphasis lh-1">And one more thing</span>
             </h3>
             <p class="ms-md-5 ps-md-1">
                 Laravel Orchid offers a wide range of features to enhance your user interface and improve data
@@ -88,10 +88,10 @@
         </div>
 
         <div class="col-md-6 my-2">
-            <h3 class="text-muted fw-light lh-lg d-flex align-items-center">
+            <h3 class="text-muted fw-light d-flex align-items-center gap-3">
                 <x-orchid-icon path="bs.life-preserver"/>
 
-                <span class="ms-3 text-dark">Connect with the Community</span>
+                <span class="text-body-emphasis lh-1">Connect with the Community</span>
             </h3>
             <div class="ms-md-5 ps-md-1">
                 <p>
